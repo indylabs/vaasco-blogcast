@@ -1,0 +1,74 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="../vaasco-common/vaasco-icons.html">
+<link rel="import" href="../vaasco-common/vaasco-styles.html">
+<link rel="import" href="../vaasco-common/vaasco-controls-toggle.html">
+
+<dom-module id="vaasco-widget-controls">
+
+  <template>
+
+    <style include="vaasco-styles">
+        
+        app-toolbar {
+          display: flex; justify-content: center; 
+          color: white;
+        }
+
+        paper-icon-button {
+          width: var(--vaasco-icon-size-medium); 
+          height: var(--vaasco-icon-size-medium); 
+        }
+
+        vaasco-controls-toggle {
+          width: var(--vaasco-controls-toggle-width);
+          height: var(--vaasco-controls-toggle-width);
+          display: flex;
+          align-items: center;
+          justify-content: middle;
+          vertical-align: center;
+        }
+
+    </style>
+
+    <app-toolbar>
+        
+        <paper-icon-button class$="color-{{config.color}}-500" icon="prev" index="{{index}}" on-click="prev"></paper-icon-button>
+        
+        <vaasco-controls-toggle spinner="{{spinner}}" play="{{play}}" index="{{index}}" color="white"></vaasco-controls-toggle>
+
+        <paper-icon-button class$="color-{{config.color}}-500" icon="next" index="{{index}}" on-click="next"></paper-icon-button>
+
+    </app-toolbar>
+
+  </template>
+
+  <script>
+
+    Polymer({
+      
+      is: 'vaasco-widget-controls',
+
+      properties: {
+        index: {
+          type: Number,
+          value: 0
+        },
+        play: Boolean,
+        spinner: Boolean,
+        color: String
+      },
+
+      prev: function() {
+        this.fire('vaasco-controls-prev', {current: this.index});
+      },
+
+      next: function() {
+        this.fire('vaasco-controls-next', {current: this.index});
+      }
+      
+    });
+  </script>
+</dom-module>

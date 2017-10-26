@@ -1,0 +1,72 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../bower_components/paper-spinner/paper-spinner-lite.html">
+<link rel="import" href="vaasco-icons.html">
+<link rel="import" href="vaasco-styles.html">
+
+<dom-module id="vaasco-controls-toggle">
+  <template>
+
+    <style include="vaasco-styles">
+        paper-icon-button {
+          width: var(--vaasco-icon-size-large); 
+          height: var(--vaasco-icon-size-large); 
+          padding: var(--vaasco-spacing-medium);
+        }
+
+        paper-spinner-lite {
+          width: var(--vaasco-spinner-size);
+          height: var(--vaasco-spinner-size);
+          margin: auto;
+        }  
+
+        
+    </style>
+
+    <template is="dom-if" if="{{!spinner}}">
+
+      <template is="dom-if" if="{{!play}}">
+          <paper-icon-button aria-label$="Play track - {{label}}" class$="color-{{color}}-500" icon="play" on-tap="tap"></paper-icon-button>
+      </template>
+
+      <template is="dom-if" if="{{play}}">
+          <paper-icon-button aria-label$="Pause track - {{label}}" class$="color-{{color}}-500" icon="pause" on-tap="tap"></paper-icon-button>
+      </template>
+
+    </template>
+    
+    <template is="dom-if" if="{{spinner}}">
+        <paper-spinner-lite
+          active="{{spinner}}"
+          class$="spinner-theme-{{color}}"
+          alt="Loading post">
+        </paper-spinner-lite>
+    </template>
+  </template>  
+
+  <script>
+    Polymer({
+      
+      is: 'vaasco-controls-toggle',
+
+      properties: {
+        color: String,
+        play: Boolean,
+        spinner: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      tap: function(e) {
+        if(!this.play) {
+          this.fire('vaasco-controls-play', {index: this.index});
+        } else {
+          this.fire('vaasco-controls-pause', {index: this.index});
+        }
+        e.stopPropagation();
+      }
+
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,55 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../vaasco-widget/vaasco-widget-post.html">
+<link rel="import" href="../vaasco-common/vaasco-styles.html">
+
+<dom-module id="vaasco-widget-posts">
+
+  <template>
+
+    <style include="vaasco-styles">
+
+        paper-spinner-lite {
+            position: absolute;
+            width: var(--vaasco-spinner-size);
+            height: var(--vaasco-spinner-size);
+            left: calc((100% / 2) - (var(--vaasco-spinner-size) / 2)); 
+            top: calc((100% / 2) - (var(--vaasco-spinner-size) / 2)); 
+            z-index: --vaasco-spinner-z-index;
+        }
+
+        .vaasco-post-wrapper {padding-bottom: var(--vaasco-spacing-large);}
+
+        @media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
+          .vaasco-post-wrapper {
+            padding-bottom: var(--vaasco-spacing-medium);
+          }
+        }  
+    </style>
+
+    <template is="dom-if" if="{{spinner}}">
+      <paper-spinner-lite class$="spinner-theme-{{config.color}}" active="{{spinner}}"></paper-spinner-lite>
+    </template>  
+
+    <template is="dom-repeat" items="{{posts}}">  
+        <div class="vaasco-post-wrapper">
+            <vaasco-widget-post config="{{config}}" post="{{item}}" index="{{index}}" tabindex$="[[tabIndex]]"></vaasco-widget-post>
+        </div>
+    </template>
+    
+  </template>  
+
+  <script>
+
+    Polymer({
+
+      is: 'vaasco-widget-posts',
+
+      properties: {
+        spinner: Boolean,
+        posts: Array
+      }
+
+    });
+  </script>     
+<dom-module>

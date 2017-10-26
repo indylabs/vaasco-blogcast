@@ -1,0 +1,51 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../vaasco-utilities/vaasco-html.html">
+<link rel="import" href="../vaasco-common/vaasco-styles.html">
+
+<dom-module id="vaasco-widget-details">
+
+    <template>
+
+        <style include="vaasco-styles">
+
+            :host {
+                font-size: var(--vaasco-font-size-large);
+                line-height: var(--vaasco-line-height-large);
+                color: var(--paper-grey-800);
+            }
+
+        </style>
+
+        <vaasco-html html="{{excerpt}}"></vaasco-html>
+
+        <template is="dom-if" if="{{showMoreLink}}">
+            <p class="link-more"><a href="{{post.url}}" class="more-link">Continue reading<span class="screen-reader-text"> &#8220;{{this.post.title}}&#8221;</span></a></p>
+        </template>
+        
+    </template>
+
+    <script>
+        Polymer({
+            is: 'vaasco-widget-details',
+
+            properties: {
+                post: {
+                    type: Object,
+                    observer: 'postChanged'
+                },
+                excerpt: String,
+                showMoreLink: Boolean
+            },
+
+            postChanged: function(){
+                this.set('excerpt', this.post.excerpt.html);
+
+                if (this.excerpt.indexOf('<p class="link-more">') === -1) {
+                    this.set('showMoreLink', true);
+                }
+            }
+        });
+    </script>
+
+</dom-module>    

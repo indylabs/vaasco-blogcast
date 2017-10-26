@@ -1,0 +1,8 @@
+{
+  "entrypoint": "src/components/vaasco-widget/vaasco-widget.html",
+  "shell": "src/components/vaasco-widget/vaasco-widget.html",
+  "sourceGlobs": [
+   "src/**/*",
+   "bower.json"
+  ]
+}

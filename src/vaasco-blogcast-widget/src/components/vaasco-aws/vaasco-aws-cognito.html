@@ -1,0 +1,41 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../vaasco-aws/vaasco-aws.html">
+
+<dom-module id="vaasco-aws-cognito">
+    
+    <template>
+        <iron-ajax auto url$="{{url}}" handle-as="json" on-response="handleAWSResponse"></iron-ajax>
+    </template>
+
+    <script>
+
+        Polymer({
+
+            is: 'vaasco-aws-cognito',
+
+            properties: {
+                url: String,
+                region: String
+            },
+
+            handleAWSResponse: function(data) {
+                var that = this;
+                
+                AWS.config.region = this.region;
+                AWS.config.credentials = new AWS.CognitoIdentityCredentials({IdentityId: data.detail.response['IdentityId']});
+
+                AWS.config.credentials.get(function(){
+                    that.fire('vaasco-aws-cognito-credentials', {credentials: AWS.config.credentials.data['Credentials']})
+                });    
+                
+            },
+
+            getRegionFromIdentityId: function(identityId) {
+                return identityId.split(':')[0];
+            }
+        });
+
+    </script>
+
+</dom-module>

@@ -1,0 +1,25 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+
+<dom-module id="vaasco-versions">
+
+    <template>
+        <template is="dom-if" if="{{versions}}">
+            <span>Wordpress: {{versions.wordpress}}</span>
+            <span>Plugin: {{versions.plugin}}</span>
+            <span>Widget: {{versions.widget}}</span>
+        </template>
+    </template>      
+
+    <script>
+        Polymer({
+
+            is: 'vaasco-versions',
+
+            properties: {
+                versions: Object
+            }
+        
+        });
+    </script>  
+
+</dom-module>

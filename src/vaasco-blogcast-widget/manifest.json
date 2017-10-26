@@ -1,0 +1,8 @@
+{
+  "name": "Vaasco Blogcast",
+  "short_name": "Vaasco Blogcast",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#3f51b5",
+  "background_color": "#3f51b5"
+}

@@ -1,0 +1,75 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../vaasco-common/vaasco-styles.html">
+<link rel="import" href="../vaasco-common/vaasco-icons.html">
+
+<dom-module id="vaasco-widget-toolbar">
+
+  <template>
+
+    <style include="vaasco-styles">
+      paper-icon-button, .vaasco-heading {
+        color: white;
+      }
+
+      #menu {
+        padding-left: var(--vaasco-spacing-medium);
+      }
+
+      .vaasco-heading { 
+        @apply(--paper-font-common-base);
+      }
+
+      paper-icon-button {
+        width: var(--vaasco-icon-size-medium);
+        height: var(--vaasco-icon-size-medium);
+      }
+
+    </style>
+
+    <app-toolbar id="vaasco-app-toolbar" class$="vaasco-app-toolbar bg-{{color}}-500">
+
+        <paper-icon-button 
+          id="menu"
+          icon="menu" 
+          on-tap="tapMenu"
+          role="button"
+          aria-label="Menu"
+          aria-describedby="vaasco-widget-toolbar-menu-description">
+        </paper-icon-button>
+        <span id="vaasco-widget-toolbar-menu-description" class="aria-description">Toggle menu containing playlists</span>
+        
+        <div id="vaasco-heading" class="vaasco-heading" main-title>{{heading}}</div>
+
+        <paper-icon-button 
+          id="close"
+          icon="close" 
+          on-tap="tapClose"
+          role="button"
+          aria-label="Close menu">
+        </paper-icon-button>
+
+    </app-toolbar>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'vaasco-widget-toolbar',
+
+      properties: {
+        heading: String
+      },
+
+      tapMenu: function() {
+        this.fire('vaasco-widget-drawer-toggle');
+      },
+
+      tapClose: function() {
+        this.fire('vaasco-widget-close');
+      }
+
+    });
+  </script>
+</dom-module>

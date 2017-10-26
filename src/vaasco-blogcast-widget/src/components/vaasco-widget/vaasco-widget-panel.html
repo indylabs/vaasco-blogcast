@@ -1,0 +1,288 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../vaasco-widget/vaasco-widget-playlists.html">
+<link rel="import" href="../vaasco-widget/vaasco-widget-posts.html">
+<link rel="import" href="../vaasco-widget/vaasco-widget-toolbar.html">
+<link rel="import" href="../vaasco-widget/vaasco-widget-controls.html">
+
+<link rel="import" href="../vaasco-common/vaasco-icons.html">
+<link rel="import" href="../vaasco-common/vaasco-styles.html">
+
+<link rel="import" href="../../behaviors/posts.html">
+
+<dom-module id="vaasco-widget-panel">
+
+  <template>
+
+    <style include="vaasco-styles">
+
+      :host {
+        display: flex;
+        flex-direction: column;
+        height: 100%; 
+        position: relative;
+      }
+
+      app-drawer {
+        position: absolute;
+        z-index: var(--vaasco-panel-drawer-z-index);
+      }
+
+      vaasco-widget-playlists {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+      }
+
+      vaasco-widget-toolbar {
+        height: var(--vaasco-header-height);
+        min-height: var(--vaasco-header-height);
+        max-height: var(--vaasco-header-height);
+      }
+
+      vaasco-widget-posts {
+        flex-grow: 1;  
+        padding: var(--vaasco-spacing-large) var(--vaasco-spacing-large) 0 var(--vaasco-spacing-large);
+        height: var(--vaasco-posts-height);
+        min-height: var(--vaasco-posts-height);
+        max-height: var(--vaasco-posts-height);
+        background-color: var(--paper-grey-100);
+        overflow-y: scroll;
+      }  
+
+      vaasco-widget-controls {
+        height: var(--vaasco-footer-height);
+        min-height: var(--vaasco-footer-height);
+        max-height: var(--vaasco-footer-height);
+      }
+
+      .vaasco-error {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-grow: 1;  
+        padding: var(--vaasco-spacing-large);
+        height: var(--vaasco-posts-height);
+        min-height: var(--vaasco-posts-height);
+        max-height: var(--vaasco-posts-height);
+        background-color: var(--paper-grey-100);
+        overflow-y: scroll;
+      }
+
+      .vaasco-error iron-icon {
+        margin-right: var(--vaasco-spacing-medium);
+      }
+      
+      @media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
+        vaasco-widget-posts {
+          padding: var(--vaasco-spacing-medium) var(--vaasco-spacing-medium) 0 var(--vaasco-spacing-medium);
+        }
+      }  
+
+    </style>
+    
+    <iron-ajax id="ajax" url="/wp-json/wp/v2/posts?_embed&categories={{playlist}}" handle-as="json" on-response="handlePosts"></iron-ajax>
+
+    <vaasco-widget-toolbar 
+      role="toolbar" 
+      tabindex="-1" 
+      aria-label="Text to speech toolbar" 
+      heading="{{config.heading}}" 
+      color="{{config.color}}">
+    </vaasco-widget-toolbar>
+    
+    <app-drawer id="menu-drawer" swipe-open="true">
+      <vaasco-widget-playlists class$="bg-{{config.color}}-300" playlists="{{config.playlists}}" selected="{{playlist}}"></vaasco-widget-playlists>
+    </app-drawer>
+
+    <template is="dom-if" if="{{noPlaylists}}">
+      <div class="vaasco-error" 
+        on-mouseover="addScrollLock" on-mouseout="removeScrollLock" on-track="handleTrack">
+        <iron-icon icon="error"></iron-icon> No playlists found
+      </div>
+    </template>
+
+    <template is="dom-if" if="{{!noPlaylists}}">
+      <vaasco-widget-posts role="listbox" 
+        id="vaasco-widget-posts" 
+        posts="{{posts}}" config="{{config}}" spinner="{{postsSpinner}}"
+        on-mouseover="addScrollLock" on-mouseout="removeScrollLock" on-track="handleTrack">
+      </vaasco-widget-posts>  
+    </template>
+    
+    <vaasco-widget-controls 
+      class$="bg-{{config.color}}-500"
+      play="{{play}}" 
+      index="{{index}}"
+      spinner="{{trackSpinner}}">
+    </vaasco-widget-controls>  
+
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'vaasco-widget-panel',
+
+      properties: {
+        playlist: {
+          type: String,
+          observer: 'playlistChanged'
+        },
+        play: {
+          type: Boolean,
+          value: false
+        },
+        index: {
+          type: Number,
+          value: 0
+        },
+        posts: Array,
+        postsSpinner: Boolean,
+        trackSpinner: Boolean,
+        noPlaylists: {
+          type: Boolean,
+          value: false
+        }  
+      },
+
+      ready: function() {
+        this.set('noPlaylists', this.config.playlists.length === 0);
+
+        this.addEventListener('vaasco-post-tap', function (e) {
+          var index = e.detail.index,
+            playing = this.get('posts.' + index + '.play');
+
+          if (playing) {
+            this.pauseTrack(index);
+          } else {
+            this.stopTracks();
+            this.playTrack(index);
+          }
+        });
+
+        this.addEventListener('vaasco-controls-play', function (e) {
+          var index = e.detail.index;          
+          this.stopTracks();
+          this.playTrack(index);
+        });
+
+        this.addEventListener('vaasco-controls-prev', function (e) {
+          var current = e.detail.current,
+            prev = current - 1;
+
+          if (this.posts[current].progress > 5) {
+            this.set('posts.' + current + '.progress', 0);
+            this.stopTracks();
+            this.playTrack(current);
+          } else {
+            prev = (prev < 0) ? (this.posts.length - 1) : prev;
+
+            this.stopTracks();
+            this.playTrack(prev);
+          }
+        });  
+
+        this.addEventListener('vaasco-controls-next', function (e) {
+          var current = e.detail.current,
+            next = current + 1;
+
+          next = (next > (this.posts.length - 1)) ? 0 : next;
+
+          this.stopTracks();
+          this.playTrack(next);
+        });  
+
+        this.addEventListener('vaasco-synthesis-status', function (data) {
+          this.set('trackSpinner', data.detail.status === 'loading');
+        });
+
+        this.addEventListener('vaasco-controls-pause', function (e) {
+          this.pauseTrack(e.detail.index);
+        });
+
+        this.addEventListener('vaasco-synthesis-finished', function () {
+          var next = this.index + 1;
+
+          this.stopTracks();
+          
+          if (next < this.posts.length) {
+            this.playTrack(next);
+          }
+        });
+
+        this.addEventListener('vaasco-widget-drawer-toggle', function () {
+         this.toggleDrawer();
+        });
+
+        this.addEventListener('vaasco-widget-close', function () {
+          this.opened = !this.opened;
+        });
+      },
+
+      //Tracks
+      playTrack: function(index) {
+        this.set('posts.' + index + '.play', true);
+        this.set('index', index);
+        this.set('play', true);
+      },
+
+      pauseTrack: function(index) {
+        this.set('posts.' + index + '.play', false);
+        this.set('index', index);
+        this.set('play', false);
+      },
+
+      stopTracks: function() {
+        for (var index=0; index<this.posts.length; index++){
+          this.set('posts.' + index + '.play', false);
+        }
+        this.set('play', false);
+      },
+
+      //Drawer
+      toggleDrawer: function() { 
+        this.$$('app-drawer').toggle();
+      },
+
+      //Playlist / Posts
+      playlistChanged: function() {
+        this.set('postsSpinner', true);
+        this.$.ajax.generateRequest();
+      },
+
+      handlePosts: function(data) {
+        this.set('posts', VaascoBehaviors.Posts.transform(data.detail.response));
+        this.set('postsSpinner', false);
+        this.$$('#vaasco-widget-posts').focus();
+      },
+
+      //Scrolling
+      addScrollLock: function() {
+        document.body.classList.add("vaascoNoScroll");
+      },
+
+      removeScrollLock: function() {
+        document.body.classList.remove("vaascoNoScroll");
+      },
+
+      handleTrack: function(e) {
+        switch(e.detail.state) {
+          case 'start':
+            this.addScrollLock();
+            break;
+          case 'end':
+            this.removeScrollLock();
+            break;
+        }
+      }
+
+    });
+  </script>
+</dom-module>

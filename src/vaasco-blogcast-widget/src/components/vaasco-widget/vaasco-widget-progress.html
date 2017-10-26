@@ -1,0 +1,47 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/paper-progress/paper-progress.html">
+
+<link rel="import" href="../vaasco-common/vaasco-styles.html">
+
+<dom-module id="vaasco-widget-progress">
+
+    <template>
+
+        <style include="vaasco-styles">
+            :host {
+                display: flex;
+                flex-flow: row;
+                align-items: stretch;
+                font-size: var(--vaasco-font-size-medium);
+                background-color: transparent;
+                color: var(--paper-grey-600);
+            }
+
+            .vaasco-widget-progress-tracker {
+                flex: 1;
+            }    
+
+            .vaasco-widget-progress-tracker paper-progress {
+                --paper-progress-container-color: white;
+                width: 100%;
+            }
+        </style>
+
+        <div class="vaasco-widget-progress-tracker">
+            <paper-progress class$="progress-theme-{{color}}" id="vaasco-progress" value="{{progress}}" secondary-progress="100"></paper-progress>
+        </div>
+
+    </template> 
+
+    <script>
+        Polymer({
+            is: 'vaasco-widget-progress',
+
+            properties: {
+                progress: Number,
+                color: String
+            },
+        });
+    </script>        
+
+</dom-module>

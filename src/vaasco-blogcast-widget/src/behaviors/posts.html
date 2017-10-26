@@ -1,0 +1,54 @@
+<script>
+  window.VaascoBehaviors = window.VaascoBehaviors || {};
+
+  VaascoBehaviors.Posts = {
+
+    transform: function(posts) {
+      var transformation = [],
+        that = this;
+         
+      posts.forEach(function(post) {
+        transformation.push({
+          'id': post.id,
+          'title': post.title.rendered,
+          'author': post._embedded.author.name,
+          'url': post.link,
+          'content': {
+            'text': that.html2Text(post.content.rendered),
+            'html': post.content.rendered
+          },
+          'images': {
+            'thumbnail': that.checkThumbnail(post)
+          }, 
+          'date': post.date,
+          'excerpt': {
+            'text': that.html2Text(post.excerpt.rendered),
+            'html': post.excerpt.rendered
+          },  
+          'play': false,
+          'progress': 0
+        });
+      });
+
+      return transformation;
+    },
+
+    html2Text: function(html) {
+      var tmp = document.createElement("div");
+      tmp.innerHTML = html;
+      return tmp.textContent || tmp.innerText || "";
+    },
+
+    checkThumbnail: function(post) {
+      return post['_embedded'] && 
+        post['_embedded']['wp:featuredmedia'] && 
+        post['_embedded']['wp:featuredmedia'][0] && 
+        post['_embedded']['wp:featuredmedia'][0]['media_details'] && 
+        post['_embedded']['wp:featuredmedia'][0]['media_details']['sizes'] &&
+        post['_embedded']['wp:featuredmedia'][0]['media_details']['sizes']['thumbnail'] &&
+        post['_embedded']['wp:featuredmedia'][0]['media_details']['sizes']['thumbnail']['source_url'] ? 
+        post['_embedded']['wp:featuredmedia'][0]['media_details']['sizes']['thumbnail']['source_url'] : null;
+    }
+
+  };
+</script>

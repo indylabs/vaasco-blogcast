@@ -1,0 +1,284 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../vaasco-widget/vaasco-widget-progress.html">
+<link rel="import" href="../vaasco-widget/vaasco-widget-details.html">
+<link rel="import" href="../vaasco-common/vaasco-controls-toggle.html">
+<link rel="import" href="../vaasco-common/vaasco-icons.html">
+<link rel="import" href="../vaasco-common/vaasco-styles.html">
+<link rel="import" href="../vaasco-utilities/vaasco-dates.html">
+<link rel="import" href="../vaasco-utilities/vaasco-html.html">
+<link rel="import" href="../vaasco-common/vaasco-synthesis-polly.html">
+
+<dom-module id="vaasco-widget-post">
+
+  <template>
+
+    <style include="vaasco-styles">
+
+      :host {
+        display: flex;
+        background-color: white;
+      }
+
+      iron-icon { 
+          height: var(--vaasco-icon-size-small); 
+          width: var(--vaasco-icon-size-small);
+          color: var(--paper-grey-600);
+      }
+      
+      .vaasco-post-card {
+        width: 100%;
+        @apply(--vaasco-box-shadow-medium);
+        @apply(--paper-font-common-base);
+      }
+
+      .vaasco-post-card .content {display: flex; flex-direction: row; padding: var(--vaasco-spacing-medium); cursor: pointer;}
+
+      .vaasco-post-card .content iron-image.thumbnail, .vaasco-post-card .content iron-icon.thumbnail {
+        min-width: var(--vaasco-thumbnail-size); width: var(--vaasco-thumbnail-size);
+        min-height: var(--vaasco-thumbnail-size); height: var(--vaasco-thumbnail-size); 
+        margin-right: var(--vaasco-spacing-medium); 
+        background-color: var(--paper-grey-300);
+        color: var(--paper-grey-500);
+      }
+      
+      .vaasco-post-card .content .text {
+        display: flex; flex-grow: 1; flex-direction: column; 
+        align-items: flex-start;
+      }
+      
+      .vaasco-post-card .content .text .title {
+        flex-grow: 1; 
+        font-size: var(--vaasco-font-size-large);
+        font-weight: normal;
+        line-height: var(--vaasco-line-height-medium);
+        color: var(--paper-grey-800);
+        margin: 0;
+      }
+
+      @media only screen and (min-device-width : 375px) {
+        .vaasco-post-card .content .text .title {
+          line-height: var(--vaasco-line-height-large);
+        }  
+      }  
+
+      .vaasco-post-card .content .details {
+        display: flex;
+        flex-direction: column;
+        align-content: stretch;
+        width: 100%;
+        padding-top: var(--vaasco-spacing-medium);
+        font-size: var(--vaasco-font-size-medium);
+        line-height: var(--vaasco-line-height-medium);
+        color: var(--color-grey-600);
+      }
+
+      .vaasco-post-card .content .details span {
+        flex: 1;  
+      }
+
+      .vaasco-post-card .content .details span:last-of-type {
+        text-align: left;
+      }
+
+      @media only screen and (min-device-width : 375px) {
+        .vaasco-post-card .content .details {
+          flex-direction: row;
+        }  
+
+        .vaasco-post-card .content .details span:last-of-type {
+          text-align: right;
+          margin-top: 0;
+        }
+      }
+
+      vaasco-controls-toggle {
+        display: flex; flex-direction: column;
+        align-items: center; vertical-align: center; justify-content: center;
+        min-width: var(--vaasco-controls-toggle-width); width: var(--vaasco-controls-toggle-width);
+        z-index: 1000;
+      }
+
+      .vaasco-post-card .actions {
+        display: flex; flex-direction: row;
+        border-top: 1px solid var(--paper-grey-300);
+        padding: 0 var(--vaasco-spacing-medium);
+        cursor: pointer;
+      }
+
+      .vaasco-post-card .actions paper-icon-button {
+        min-width: var(--vaasco-controls-toggle-width); width: var(--vaasco-controls-toggle-width);
+        padding: var(--vaasco-spacing-small);
+      }
+
+      vaasco-widget-progress {
+        display: flex; flex-grow: 1;
+        align-items: center; vertical-align: middle;
+      }
+
+      .vaasco-widget-post-more {
+        min-width: var(--vaasco-controls-toggle-width); width: var(--vaasco-controls-toggle-width);
+      }
+
+      vaasco-widget-details {
+        display: flex;
+        flex-direction: column;
+        padding: 0 var(--vaasco-spacing-medium) var(--vaasco-spacing-medium);
+        font-size: var(--vaasco-font-size-large);
+        font-weight: normal;
+        line-height: var(--vaasco-line-height-large);
+        color: var(--paper-grey-800);
+      }
+
+    </style>
+
+    <div class$="vaasco-post-card {{isPlaying(post.play)}}">
+
+      <div class="content" on-tap="onPostTap">
+          
+        <template is="dom-if" if="{{showThumbnails(config)}}">
+          <template is="dom-if" if="{{post.images.thumbnail}}">
+            <iron-image class="thumbnail" sizing="contain" preload fade src="{{post.images.thumbnail}}" alt="{{post.title}}"></iron-image>
+          </template>
+          <template is="dom-if" if="{{!post.images.thumbnail}}">
+            <iron-icon class="thumbnail" icon="image"></iron-icon>
+          </template>    
+        </template>
+          
+        <div class="text">
+          <h1 class="title">
+            <vaasco-html html="{{post.title}}"></vaasco-html>
+          </h1>
+          <div class="details">
+            <span><iron-icon icon="date"></iron-icon> {{formatDate(post.date)}} </span>
+            <span><iron-icon icon="clock"></iron-icon> {{durationDescription(duration)}} </span>
+          </div>  
+        </div>
+
+        <vaasco-controls-toggle spinner="{{spinner}}" color="{{config.color}}" play="{{post.play}}" index="{{index}}" label="{{post.title}}"></vaasco-controls-toggle>
+            
+      </div><!-- END .content -->
+
+      <div class="actions" on-tap="toggleExpand">
+        <vaasco-widget-progress color="{{config.color}}" progress="{{percentage}}"></vaasco-widget-progress>  
+        <paper-icon-button class$="color-{{config.color}}-500" id="arrow" icon="arrow-down" title="More details">
+      </div>
+
+      <iron-collapse id="card-expand">
+        <vaasco-widget-details post="{{post}}"></vaasco-widget-details>  
+      </iron-collapse>
+    
+    </div>
+    
+    <vaasco-synthesis-polly
+      aws="{{config.services.aws}}"
+      utterance="{{post.content.text}}"
+      active="{{post.play}}"
+      progress="{{post.progress}}"
+      index="{{index}}">
+    </vaasco-synthesis-polly>
+
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'vaasco-widget-post',
+
+      properties: {
+        post: {
+          type: Object
+        },
+        progress: {
+          type: Number,
+          value: 0
+        },
+        percentage: {
+          type: Number,
+          value: 0,
+          computed: 'computePercentage(post.progress)'
+        },
+        duration: {
+          type: Number,
+          computed: 'computeDuration(post, post.*)'
+        },
+        index: Number,
+        spinner: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      ready: function() {
+        var vaascoTimer,
+          that = this;
+
+        this.addEventListener('vaasco-synthesis-status', function (data) {
+          this.set('spinner', data.detail.status === 'loading');
+          this.set('post.progress', data.detail.status === 'initializing' ? 0 : this.post.progress);
+          this.set('post.progress', data.detail.status === 'ended' ? 100 : this.post.progress);
+        });
+
+        this.addEventListener('vaasco-synthesis-progress', function (data) {
+          window.clearTimeout(vaascoTimer);
+
+          if (data.detail.progressing) {
+            vaascoTimer = window.setInterval(function() {
+              that.set('post.progress', that.post.progress + 1);
+            }, 1000);
+          }
+        });
+      },
+
+      // NOTE: 2.5 words per second
+      computeDuration: function(post) {
+        return (post.content.text.split(' ').length / 3);
+      },
+
+      computePercentage: function(progress) {
+        if (progress >= 100) { return 100; }
+
+        if (progress) {
+          return (this.post.progress / this.duration) * 100;
+        }
+        
+        return 0;
+      },
+
+      showThumbnails: function(config) {
+        return config.thumbnails === 'true';
+      },
+
+      toggleExpand: function() {
+        var cardExpand = this.$['card-expand'];
+
+        this.$['arrow'].icon = cardExpand.opened ? 'arrow-down' : 'arrow-up';
+        cardExpand.toggle();
+      },
+
+      isPlaying: function(play) {
+        return play ? 'bg-grey-300' : '';
+      },
+
+      formatDate: function(date) {
+          return moment(date, "YYYY-MM-DD HH:mm:ss").fromNow();
+      },
+
+      durationDescription: function(duration) {
+        var mins = moment.duration(duration * 1000).asMinutes();
+        return mins < 1 ? '< 1 min' : 
+          mins < 2 ? 'About 1 min' : 
+            'About ' + Math.round(mins) + ' mins';
+      },
+
+      onPostTap: function() {
+        this.fire('vaasco-post-tap', {index: this.index});
+      }
+      
+    });
+    
+  </script>
+</dom-module>

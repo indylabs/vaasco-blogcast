@@ -1,0 +1,36 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../vaasco-common/vaasco-styles.html">
+
+<dom-module id="vaasco-html">
+
+  <template>
+
+    <style include="vaasco-styles">
+      :host ::content p {margin-bottom: var(--vaasco-spacing-medium);}
+      :host ::content p:last-of-type {margin-bottom: 0px;}
+      :host ::content a {text-decoration: underline; font-weight: normal; border: none; } 
+      :host ::content a:hover {text-decoration: none;}
+    </style>
+
+  </template>  
+
+  <script>
+    Polymer({
+
+      is: 'vaasco-html',
+
+      properties: {
+        html: {
+          type: String,
+          observer: 'htmlChanged'
+        }
+      },
+
+      htmlChanged: function() {
+        this.innerHTML = this.html;
+      }
+      
+    });
+  </script>  
+
+</dom-module>

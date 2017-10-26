@@ -1,0 +1,194 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+
+<dom-module id="vaasco-synthesis-polly">
+  <template>
+    <div>
+      <audio id$="audio-{{index}}" preload="metadata">
+        Your browser does not support the audio tag.
+      </audio>
+    </div>  
+  </template>  
+  <script>
+    Polymer({
+      is: 'vaasco-synthesis-polly',
+
+      properties: {
+        aws: {
+          type: Object,
+          observer: 'awsChanged'
+        },  
+        utterance: {
+          type: String,
+          observer: 'utteranceChanged'
+        },
+        chunk: {
+          type: Number,
+          value: 0
+        },
+        chunks: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+        active: {
+          type: Boolean,
+          value: false,
+          observer: 'activeChanged'
+        },
+        duration: Number,
+        progress: {
+          type: Number,
+          value: 0
+        },
+        index: {
+          type: Number,
+          value: 0
+        }
+      },
+
+      awsChanged: function() {
+        if(this.aws) {
+          this.polly = new AWS.Polly.Presigner();
+        } 
+      },
+
+      activeChanged: function(active, previous) {
+        if (typeof previous !== 'undefined') {
+          if (!active) {
+            this.pause();
+          } else {
+            this.play();
+          }
+        }
+      },
+
+      utteranceChanged: function(utterance) {
+        var max = 300,
+          sample,
+          period,
+          chunk;
+
+        this.fire('vaasco-synthesis-status', {status: 'initializing'});  
+        this.set('chunks', []);
+
+        utterance = utterance.trim();
+
+        while (utterance.length > 0) {
+          if (utterance.length < max) {
+            this.push('chunks', {
+              text: utterance,
+              percent: Math.round((utterance.length / this.utterance.length) * 100)
+            });
+
+            return;
+          }
+
+          sample = utterance.substring(0, max);
+          period = sample.indexOf('. ') > 0 ? sample.lastIndexOf('. ') : sample.length;
+          chunk = sample.substring(0, period + 2);
+
+          this.push('chunks', {
+            text: chunk,
+            percent: Math.round((chunk.length / this.utterance.length) * 100)
+          });
+
+          utterance = utterance.substring(period + 2, utterance.length);
+
+        }
+      },
+
+      pause: function() {
+        var audio = this.$$('#audio-' + this.index);
+        audio.pause();
+      },
+
+      play: function() {
+        var audio = this.$$('#audio-' + this.index),
+          paused = audio && audio.paused && audio.played.length > 0;
+      
+        if (this.progress === 0) {
+          this.speak();
+        } else if (paused) {
+          audio.play();
+        }
+      },
+
+      finished: function() {
+        if (this.chunk + 1 < this.chunks.length) {
+          this.set('chunk', this.chunk + 1);
+          this.speak();
+        } else {
+          this.fire('vaasco-synthesis-status', {status: 'ended'});
+        }
+
+      },
+
+      progressOn: function() {
+        this.fire('vaasco-synthesis-progress', {progressing: true});
+      },
+
+      progressOff: function() {
+        this.fire('vaasco-synthesis-progress', {progressing: false});
+      },
+
+      speak: function() {
+          var that = this,
+            audio = this.$$('#audio-' + this.index),
+            params = {
+                OutputFormat: 'mp3',
+                Text: this.chunks[this.chunk].text,
+                VoiceId: 'Amy'
+            };
+
+          this.fire('vaasco-synthesis-status', {status: 'loading'});
+
+          this.polly.getSynthesizeSpeechUrl(params, function(error, url) {
+            audio.src = url;
+            audio.load();
+            audio.play();
+
+            audio.oncanplay = function() {
+              that.fire('vaasco-synthesis-status', {status: 'canplay'});
+            };
+
+            audio.onended = function() {
+              that.finished();
+              that.progressOff();
+            };
+
+            audio.onplay = function() {
+              that.progressOn();
+            };
+
+            audio.onplaying = function() {
+              that.progressOn();
+            };
+
+            audio.onpause = function() {
+              that.progressOff();
+            };
+
+            audio.onabort = function() {
+              that.progressOff();
+            };
+
+            audio.oninterruptbegin = function() {
+              that.progressOff();
+            };
+
+            audio.oninterruptend = function() {
+              that.progressOn();
+            };
+
+            audio.onwaiting = function() {
+              that.progressOff();
+            };
+
+          });
+          
+      }
+
+    });
+  </script>
+</dom-module>

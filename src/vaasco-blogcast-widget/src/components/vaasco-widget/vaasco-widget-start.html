@@ -1,0 +1,52 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/paper-fab/paper-fab.html">
+
+<link rel="import" href="../vaasco-common/vaasco-icons.html">
+<link rel="import" href="../vaasco-common/vaasco-styles.html">
+
+<dom-module id="vaasco-widget-start">
+
+  <template>
+
+    <style include="vaasco-styles">
+
+      :host paper-fab {
+         width: var(--vaasco-start-button-size); 
+         height: var(--vaasco-start-button-size);
+      }
+
+    </style>
+
+    <paper-fab 
+      tabindex="-1"
+      class$="bg-{{color}}-500" 
+      icon="{{icon}}"
+      ></paper-fab>
+
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'vaasco-widget-start',
+
+      properties: {
+        icon: {
+          type: String,
+          computed: 'getIcon(active)',
+          value: 'voice'
+        },
+        color: String,
+        active: Boolean
+      },
+
+      getIcon: function() {
+        return this.active ? 'close' : 'voice';  
+      }
+
+    });
+
+  </script>
+  
+</dom-module>

@@ -1,0 +1,53 @@
+<script>
+
+  window.VaascoBehaviors = window.VaascoBehaviors || {};
+
+  VaascoBehaviors.Config = {
+
+    transform: function(config) {
+      var playlists = [],
+        services = {},
+        versions = {},
+        vaascoVersions;
+      
+      if (config['vaasco_categories']) {
+        config['vaasco_categories'].forEach(function(category) {
+          category = JSON.parse(category);
+          playlists.push({
+            'name': category.name,
+            'id': category.id
+          });
+        });
+      }
+
+      if (config['vaasco_synthesis_provider'] === 'polly') {
+        services.aws = {
+          cognitoIdUrl: config['vaasco_aws_cognito_id_url'],
+          region: config['vaasco_aws_region'],
+          credentials: {}
+        };
+      }   
+      
+      if (config['vaasco_versions']) {
+        vaascoVersions = JSON.parse(config['vaasco_versions']);
+
+        versions = {
+          wordpress: vaascoVersions['wordpress'],
+          plugin: vaascoVersions['plugin'],
+          widget: '1.0.0'
+        }
+      }   
+
+      return {
+        'heading': config['vaasco_title'] || 'Vaasco',
+        'thumbnails': config['vaasco_thumbnails'] || 'true',
+        'color': config['vaasco_color'] || 'amber',
+        'playlists': playlists,
+        'services': services,
+        'versions': versions
+      };
+    }
+
+  };
+  
+</script>

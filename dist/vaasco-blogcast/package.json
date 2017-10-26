@@ -1,0 +1,11 @@
+{
+  "name": "vaasco-blogcast",
+  "version": "1.0.0",
+  "author": "Vaasco",
+  "homepage": "https://www.vaasco.com",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-phplint": "^0.3.4",
+    "run-sequence": "^1.2.2"
+  }
+}

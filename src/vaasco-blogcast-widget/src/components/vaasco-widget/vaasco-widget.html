@@ -1,0 +1,143 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+
+<link rel="import" href="../vaasco-widget/vaasco-widget-panel.html">
+<link rel="import" href="../vaasco-widget/vaasco-widget-start.html">
+<link rel="import" href="../vaasco-common/vaasco-styles.html">
+<link rel="import" href="../vaasco-utilities/vaasco-versions.html">
+<link rel="import" href="../vaasco-aws/vaasco-aws-cognito.html">
+
+<link rel="import" href="../../behaviors/config.html">
+
+<dom-module id="vaasco-widget">
+    
+    <template>
+
+        <style include="vaasco-styles">
+
+          :host {
+            --vaasco-panel-height: calc(100% - (var(--vaasco-start-button-size) * 2 + (var(--vaasco-spacing-large) * 4)));
+            --vaasco-panel-top: calc(((var(--vaasco-start-button-size) * 2) + (var(--vaasco-spacing-large) * 4)) / 2); 
+          }
+
+          vaasco-versions {
+            display: none;
+          }
+
+          vaasco-widget-panel {
+            position: fixed; 
+            width: 100%; max-width: var(--vaasco-panel-max-width); 
+            margin: 0 0 0 var(--vaasco-spacing-large); 
+            height: var(--vaasco-panel-height);
+            width: var(--vaasco-panel-max-width); 
+            top: var(--vaasco-panel-top); 
+            background-color: var(--vaasco-background-color);
+            z-index: var(--vaasco-panel-z-index);
+            overflow: hidden;
+            @apply(--vaasco-border-radius-large);
+            @apply(--vaasco-box-shadow-large);  
+          }
+
+          @media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
+            vaasco-widget-panel {
+              @apply(--vaasco-fullscreen);  
+            }
+          }  
+
+          vaasco-widget-start {
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            margin: var(--vaasco-spacing-large);
+            z-index: var(--vaasco-start-button-z-index); 
+          }
+
+        </style>
+        <template is="dom-if" if="{{config}}">
+          <vaasco-versions hidden="true" aria-hidden="true" versions="{{config.versions}}"></vaasco-versions>
+          <vaasco-aws-cognito hidden="true" aria-hidden="true" url="{{config.services.aws.cognitoIdUrl}}" region="{{config.services.aws.region}}"></vaasco-aws-cognito>
+
+          <iron-a11y-keys id="a11yStartButton" target="[[startButton]]" keys="space enter" on-keys-pressed="togglePanel"></iron-a11y-keys>
+          <iron-a11y-keys id="a11yEscape" target="[[panel]]" keys="esc" on-keys-pressed="togglePanel"></iron-a11y-keys>
+
+          <vaasco-widget-start 
+            id="vaasco-widget-start" 
+            color="{{config.color}}" 
+            active={{opened}} 
+            on-tap="togglePanel"
+            tabindex="0"
+            role="button"
+            aria-label="Text to speech"
+            aria-describedby="vaasco-widget-start-description"
+            aria-pressed="{{opened}}"
+            aria-haspopup="true"></vaasco-widget-start>
+          <span id="vaasco-widget-start-description" class="aria-description">View a list of blog posts which can be read aloud</span>
+
+          <template is="dom-if" if="{{opened}}">
+            <vaasco-widget-panel 
+              id="vaasco-widget-panel" 
+              role="dialog" 
+              aria-label="Text to speech blogcast" 
+              aria-describedby="vaasco-widget-panel-description" 
+              opened="{{opened}}" 
+              config="{{config}}" 
+              posts="{{posts}}">
+            </vaasco-widget-panel>
+            <span id="vaasco-widget-panel-description" class="aria-description">Choose a post to listen to</span>
+          </template>
+
+        </template>
+
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'vaasco-widget',
+
+      properties: {
+        options: {
+          type: Object,
+          observer: 'optionsChanged'
+        },
+        startButton: {
+          type: Object,
+          value: function() {
+            return this.$['vaasco-widget-start'];
+          }
+        },
+        panel: {
+          type: Object,
+          value: function() {
+            return this.$['vaasco-widget-panel'];
+          }
+        },
+        config: Object
+      },
+
+      ready: function() {
+
+        this.addEventListener('vaasco-aws-cognito-credentials', function (data) {
+          this.set('config.services.aws.credentials', data.detail.credentials);
+        });
+
+        this.addEventListener('vaasco-widget-close', function () {
+          this.opened = !this.opened;
+        });
+
+      },
+
+      optionsChanged: function() {
+        this.set('config', VaascoBehaviors.Config.transform(this.options));
+      },
+
+      togglePanel: function() {
+        this.opened = !this.opened;
+      }
+
+    });
+
+  </script>
+
+</dom-module>
