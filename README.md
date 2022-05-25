@@ -1,5 +1,3 @@
-# UPDATE: Winner of Dublin Beta: http://bit.ly/byebyedublinbeta
-
 # Vaasco Blogcast
 
 Vaasco Blogcast is a WordPress plugin which automatically converts categories and blog posts to playlists of audio tracks.
