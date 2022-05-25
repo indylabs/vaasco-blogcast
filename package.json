@@ -6,7 +6,7 @@
   "homepage": "https://www.vaasco.com",
   "devDependencies": {
     "eslint-plugin-html": "^2.0.1",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.2",
     "gulp-chug": "^0.5.1",
     "gulp-eslint": "^3.0.1",
     "gulp-exec": "^2.1.3",
