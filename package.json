@@ -10,7 +10,7 @@
     "gulp-chug": "^0.5.1",
     "gulp-eslint": "^3.0.1",
     "gulp-exec": "^2.1.3",
-    "gulp-phplint": "^0.3.4",
+    "gulp-phplint": "^0.9.0",
     "gulp-polylint": "^1.0.3",
     "gulp-zip": "^4.0.0",
     "run-sequence": "^1.2.2"
